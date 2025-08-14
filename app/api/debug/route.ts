@@ -1,20 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-interface DebugInfo {
-  timestamp: string;
-  environment: string | undefined;
-  hasDiscordClientId: boolean;
-  hasDiscordClientSecret: boolean;
-  nextAuthUrl: string | undefined;
-  hasNextAuthSecret: boolean;
-  databaseUrl: string;
-  database?: string;
-  databaseError?: string;
-}
-
 export async function GET() {
-  const debug: DebugInfo = {
+  const debug = {
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV,
     hasDiscordClientId: !!process.env.DISCORD_CLIENT_ID,
