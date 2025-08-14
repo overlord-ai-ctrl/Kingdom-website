@@ -1,7 +1,9 @@
-type Params = { params: { username: string } };
+type PageProps = {
+  params: Promise<{ username: string }>;
+};
 
-export default function ProfilePage({ params }: Params) {
-  const { username } = params;
+export default async function ProfilePage({ params }: PageProps) {
+  const { username } = await params;
   return (
     <div className="p-6">
       <h1 className="text-2xl font-semibold">{username}</h1>
