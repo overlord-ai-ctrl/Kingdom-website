@@ -9,7 +9,6 @@ import { prisma } from "@/lib/prisma";
 
 const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID ?? "";
 const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET ?? "";
-const DISCORD_GUILD_ID = process.env.DISCORD_GUILD_ID ?? "";
 
 // Log configuration for debugging
 console.log("Auth Config:", {
@@ -29,7 +28,6 @@ type DiscordProfile = NextAuthProfile & {
 
 async function upsertUserFromDiscord(
   profile: DiscordProfile,
-  accessToken: string,
 ): Promise<NextAuthUser> {
   const discordId: string = String(profile.id);
   const username: string = profile.username || profile.global_name || "user";
@@ -99,10 +97,7 @@ export const authOptions: NextAuthOptions = {
       });
       if (account?.provider === "discord" && account.access_token && profile) {
         try {
-          await upsertUserFromDiscord(
-            profile as DiscordProfile,
-            account.access_token,
-          );
+          await upsertUserFromDiscord(profile as DiscordProfile);
           return true;
         } catch (error) {
           console.error("SignIn error:", error);
@@ -115,10 +110,7 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, account, profile }) {
       if (account?.provider === "discord" && account.access_token && profile) {
         try {
-          const user = await upsertUserFromDiscord(
-            profile as DiscordProfile,
-            account.access_token,
-          );
+          const user = await upsertUserFromDiscord(profile as DiscordProfile);
           token.uid = user.id;
         } catch (error) {
           console.error("JWT callback error:", error);
