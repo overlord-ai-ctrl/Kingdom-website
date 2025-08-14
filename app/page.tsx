@@ -38,6 +38,11 @@ export default function Home() {
             Test Page
           </Link>
         </div>
+        <div>
+          <Link href="/admin" className="hover:underline text-purple-500">
+            Admin Dashboard
+          </Link>
+        </div>
       </div>
     </main>
   );
