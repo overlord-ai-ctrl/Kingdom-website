@@ -1,7 +1,6 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import Link from "next/link";
-import DiscordLoginButton from "@/components/DiscordLoginButton";
 import AuthProvider from "@/components/AuthProvider";
 
 export const metadata: Metadata = {
@@ -43,7 +42,6 @@ export default function RootLayout({
                 >
                   Leaderboards
                 </Link>
-                <DiscordLoginButton />
               </div>
             </div>
           </header>
