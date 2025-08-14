@@ -142,7 +142,7 @@ model EventLog {
 model Payment {
   id               String   @id @default(cuid())
   userId           String
-  stripeCustomerId String
+  stripeCustomerId String   @unique
   status           String
   startedAt        DateTime @default(now())
   endedAt          DateTime?
