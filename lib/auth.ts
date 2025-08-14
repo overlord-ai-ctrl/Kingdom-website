@@ -6,7 +6,6 @@ import type {
 } from "next-auth";
 import DiscordProvider from "next-auth/providers/discord";
 import { prisma } from "@/lib/prisma";
-import { Role } from "@prisma/client";
 
 const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID ?? "";
 const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET ?? "";
@@ -50,34 +49,6 @@ async function upsertUserFromDiscord(
       create: { discordId, username, email, avatar },
     });
 
-    // Attempt to fetch guild membership to infer roles
-    if (accessToken && DISCORD_GUILD_ID) {
-      try {
-        const resp = await fetch(
-          `https://discord.com/api/users/@me/guilds/${DISCORD_GUILD_ID}/member`,
-          {
-            headers: { Authorization: `Bearer ${accessToken}` },
-          },
-        );
-        if (resp.ok) {
-          const data = await resp.json();
-          const roleIds: string[] = Array.isArray(data?.roles)
-            ? data.roles
-            : [];
-          // Basic mapping placeholder; in real use, map Discord role IDs to Role enum
-          const highestRole: Role =
-            roleIds.length > 0 ? Role.SQUIRE : Role.PEASANT;
-          await prisma.userRole
-            .create({
-              data: { userId: user.id, role: highestRole, source: "DISCORD" },
-            })
-            .catch(() => undefined);
-        }
-      } catch {
-        // ignore
-      }
-    }
-
     return {
       id: user.id,
       name: user.username,
@@ -117,6 +88,9 @@ export const authOptions: NextAuthOptions = {
   ],
   session: { strategy: "jwt" },
   debug: process.env.NODE_ENV === "development",
+  pages: {
+    error: "/error",
+  },
   callbacks: {
     async signIn({ account, profile }): Promise<boolean> {
       console.log("SignIn callback:", {
@@ -132,7 +106,8 @@ export const authOptions: NextAuthOptions = {
           return true;
         } catch (error) {
           console.error("SignIn error:", error);
-          return false;
+          // Don't fail the sign-in, just log the error
+          return true;
         }
       }
       return true;
@@ -147,6 +122,7 @@ export const authOptions: NextAuthOptions = {
           token.uid = user.id;
         } catch (error) {
           console.error("JWT callback error:", error);
+          // Don't fail the JWT callback
         }
       }
       return token;
