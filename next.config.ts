@@ -6,7 +6,8 @@ const nextConfig: NextConfig = {
   env: {
     DATABASE_URL:
       process.env.DATABASE_URL || "postgres://localhost:5432/the_network",
-    NEXTAUTH_URL: process.env.NEXTAUTH_URL || "http://localhost:3000",
+    NEXTAUTH_URL:
+      process.env.NEXTAUTH_URL || "https://thenetwork2.onrender.com",
     NEXTAUTH_SECRET:
       process.env.NEXTAUTH_SECRET || "fallback-secret-for-development",
     DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID || "",
