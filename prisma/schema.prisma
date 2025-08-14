@@ -1,0 +1,152 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String       @id @default(cuid())
+  discordId   String       @unique
+  username    String
+  email       String?      @unique
+  avatar      String?
+  premium     Boolean      @default(false)
+  createdAt   DateTime     @default(now())
+  roles       UserRole[]
+  submissions Submission[]
+  badges      UserBadge[]
+  events      EventLog[]
+  payments    Payment[]
+  teamMemberships TeamMember[]
+}
+
+enum Role {
+  PEASANT
+  SQUIRE
+  KNIGHT
+  BARON
+  VISCOUNT
+  EARL
+  NOBLE
+  KING
+  OVERLORD
+}
+
+model UserRole {
+  id        String   @id @default(cuid())
+  userId    String
+  role      Role
+  source    String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+enum ChallengeType {
+  DAILY
+  WEEKLY
+  MONTHLY
+}
+
+enum SubmissionStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+}
+
+model Challenge {
+  id          String       @id @default(cuid())
+  type        ChallengeType
+  title       String
+  brief       String
+  rubricJSON  Json
+  startAt     DateTime
+  endAt       DateTime
+  xp          Int
+  crowns      Int
+  difficulty  Int
+  premiumOnly Boolean      @default(false)
+  createdAt   DateTime     @default(now())
+  submissions Submission[]
+  teams       Team[]
+}
+
+model Team {
+  id           String    @id @default(cuid())
+  name         String
+  challengeId  String
+  leaderUserId String
+  createdAt    DateTime  @default(now())
+  challenge    Challenge @relation(fields: [challengeId], references: [id])
+  members      TeamMember[]
+  submissions  Submission[]
+}
+
+model TeamMember {
+  id         String @id @default(cuid())
+  teamId     String
+  userId     String
+  roleInTeam String
+  team       Team   @relation(fields: [teamId], references: [id])
+  user       User   @relation(fields: [userId], references: [id])
+}
+
+model Submission {
+  id             String            @id @default(cuid())
+  challengeId    String
+  teamId         String?
+  userId         String?
+  repoUrl        String?
+  liveUrl        String?
+  notes          String?
+  status         SubmissionStatus  @default(DRAFT)
+  scoreJSON      Json?
+  autoChecksJSON Json?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  challenge      Challenge         @relation(fields: [challengeId], references: [id])
+  team           Team?             @relation(fields: [teamId], references: [id])
+  user           User?             @relation(fields: [userId], references: [id])
+}
+
+model Badge {
+  id           String  @id @default(cuid())
+  code         String  @unique
+  name         String
+  criteriaJSON Json
+  users        UserBadge[]
+}
+
+model UserBadge {
+  id       String   @id @default(cuid())
+  userId   String
+  badgeId  String
+  earnedAt DateTime @default(now())
+  user     User     @relation(fields: [userId], references: [id])
+  badge    Badge    @relation(fields: [badgeId], references: [id])
+}
+
+model EventLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String
+  metaJSON  Json?
+  createdAt DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id])
+}
+
+model Payment {
+  id               String   @id @default(cuid())
+  userId           String
+  stripeCustomerId String   @unique
+  status           String
+  startedAt        DateTime @default(now())
+  endedAt          DateTime?
+  user             User     @relation(fields: [userId], references: [id])
+}
+
+
