@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: "standalone",
+  // output: "standalone", // Temporarily disabled to fix server issues
   serverExternalPackages: ["@prisma/client", "prisma"],
   env: {
     DATABASE_URL:
