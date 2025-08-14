@@ -88,6 +88,7 @@ export const authOptions: NextAuthOptions = {
   debug: process.env.NODE_ENV === "development",
   pages: {
     error: "/error",
+    signIn: "/dashboard",
   },
   callbacks: {
     async signIn({ account, profile }): Promise<boolean> {
@@ -124,6 +125,17 @@ export const authOptions: NextAuthOptions = {
         (session as Session & { userId?: string }).userId = String(token.uid);
       }
       return session;
+    },
+    async redirect({ url, baseUrl }) {
+      // After sign in, redirect to dashboard
+      if (url.startsWith(baseUrl)) {
+        return `${baseUrl}/dashboard`;
+      }
+      // Allow relative callback URLs
+      else if (url.startsWith("/")) {
+        return `${baseUrl}${url}`;
+      }
+      return baseUrl;
     },
   },
 };
