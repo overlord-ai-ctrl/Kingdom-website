@@ -3,7 +3,12 @@ import Link from "next/link";
 export default function Home() {
   return (
     <main className="min-h-screen flex flex-col items-center justify-center gap-6 p-8">
-      <h1 className="text-4xl font-bold">The Network</h1>
+      <div className="text-center">
+        <h1 className="text-4xl font-bold text-blue-600">The Network</h1>
+        <p className="text-sm text-gray-500 mt-2">
+          Challenge Platform - Updated {new Date().toISOString()}
+        </p>
+      </div>
       <p className="text-center text-lg max-w-2xl">
         Challenge-first, role-gated AI/dev community. Join daily, weekly, and
         monthly challenges. Level up with XP and crowns.
@@ -22,10 +27,17 @@ export default function Home() {
           Browse Challenges
         </Link>
       </div>
-      <div className="mt-8 text-sm text-gray-500">
-        <Link href="/api/health" className="hover:underline">
-          Health Check
-        </Link>
+      <div className="mt-8 text-sm text-gray-500 space-y-2">
+        <div>
+          <Link href="/api/health" className="hover:underline">
+            Health Check
+          </Link>
+        </div>
+        <div>
+          <Link href="/test" className="hover:underline text-blue-500">
+            Test Page
+          </Link>
+        </div>
       </div>
     </main>
   );
