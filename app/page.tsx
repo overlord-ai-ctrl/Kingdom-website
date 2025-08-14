@@ -1,4 +1,4 @@
-"use client";
+import Link from "next/link";
 
 export default function Page() {
   return (
@@ -22,9 +22,9 @@ export default function Page() {
 
         {/* Discord Login Button */}
         <div className="flex justify-center">
-          <button
-            onClick={() => (window.location.href = "/api/auth/signin")}
-            className="h-14 px-8 rounded-xl bg-brand-primary hover:bg-brand-primary600 text-white transition-all active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-ring text-lg font-medium flex items-center gap-3"
+          <Link
+            href="/api/auth/signin"
+            className="inline-flex h-14 px-8 rounded-xl bg-brand-primary hover:bg-brand-primary600 text-white transition-all active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-ring text-lg font-medium items-center gap-3"
           >
             <svg
               width="24"
@@ -39,7 +39,7 @@ export default function Page() {
               />
             </svg>
             Log in with Discord
-          </button>
+          </Link>
         </div>
       </div>
     </div>
