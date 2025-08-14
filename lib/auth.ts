@@ -12,6 +12,14 @@ const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID ?? "";
 const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET ?? "";
 const DISCORD_GUILD_ID = process.env.DISCORD_GUILD_ID ?? "";
 
+// Log configuration for debugging
+console.log("Auth Config:", {
+  hasClientId: !!DISCORD_CLIENT_ID,
+  hasClientSecret: !!DISCORD_CLIENT_SECRET,
+  nextAuthUrl: process.env.NEXTAUTH_URL,
+  nextAuthSecret: process.env.NEXTAUTH_SECRET ? "SET" : "MISSING",
+});
+
 type DiscordProfile = NextAuthProfile & {
   id: string | number;
   username?: string;
@@ -31,48 +39,61 @@ async function upsertUserFromDiscord(
     ? `https://cdn.discordapp.com/avatars/${discordId}/${profile.avatar}.png`
     : null;
 
-  const user = await prisma.user.upsert({
-    where: { discordId },
-    update: {
-      username,
-      email: email ?? undefined,
-      avatar: avatar ?? undefined,
-    },
-    create: { discordId, username, email, avatar },
-  });
+  try {
+    const user = await prisma.user.upsert({
+      where: { discordId },
+      update: {
+        username,
+        email: email ?? undefined,
+        avatar: avatar ?? undefined,
+      },
+      create: { discordId, username, email, avatar },
+    });
 
-  // Attempt to fetch guild membership to infer roles
-  if (accessToken && DISCORD_GUILD_ID) {
-    try {
-      const resp = await fetch(
-        `https://discord.com/api/users/@me/guilds/${DISCORD_GUILD_ID}/member`,
-        {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        },
-      );
-      if (resp.ok) {
-        const data = await resp.json();
-        const roleIds: string[] = Array.isArray(data?.roles) ? data.roles : [];
-        // Basic mapping placeholder; in real use, map Discord role IDs to Role enum
-        const highestRole: Role =
-          roleIds.length > 0 ? Role.SQUIRE : Role.PEASANT;
-        await prisma.userRole
-          .create({
-            data: { userId: user.id, role: highestRole, source: "DISCORD" },
-          })
-          .catch(() => undefined);
+    // Attempt to fetch guild membership to infer roles
+    if (accessToken && DISCORD_GUILD_ID) {
+      try {
+        const resp = await fetch(
+          `https://discord.com/api/users/@me/guilds/${DISCORD_GUILD_ID}/member`,
+          {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          },
+        );
+        if (resp.ok) {
+          const data = await resp.json();
+          const roleIds: string[] = Array.isArray(data?.roles)
+            ? data.roles
+            : [];
+          // Basic mapping placeholder; in real use, map Discord role IDs to Role enum
+          const highestRole: Role =
+            roleIds.length > 0 ? Role.SQUIRE : Role.PEASANT;
+          await prisma.userRole
+            .create({
+              data: { userId: user.id, role: highestRole, source: "DISCORD" },
+            })
+            .catch(() => undefined);
+        }
+      } catch {
+        // ignore
       }
-    } catch {
-      // ignore
     }
-  }
 
-  return {
-    id: user.id,
-    name: user.username,
-    email: user.email ?? undefined,
-    image: user.avatar ?? undefined,
-  } as NextAuthUser;
+    return {
+      id: user.id,
+      name: user.username,
+      email: user.email ?? undefined,
+      image: user.avatar ?? undefined,
+    } as NextAuthUser;
+  } catch (error) {
+    console.error("Error upserting user:", error);
+    // Return a basic user object if database fails
+    return {
+      id: discordId,
+      name: username,
+      email: email ?? undefined,
+      image: avatar ?? undefined,
+    } as NextAuthUser;
+  }
 }
 
 export const authOptions: NextAuthOptions = {
@@ -95,23 +116,38 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   session: { strategy: "jwt" },
+  debug: process.env.NODE_ENV === "development",
   callbacks: {
     async signIn({ account, profile }): Promise<boolean> {
+      console.log("SignIn callback:", {
+        hasAccount: !!account,
+        hasProfile: !!profile,
+      });
       if (account?.provider === "discord" && account.access_token && profile) {
-        await upsertUserFromDiscord(
-          profile as DiscordProfile,
-          account.access_token,
-        );
+        try {
+          await upsertUserFromDiscord(
+            profile as DiscordProfile,
+            account.access_token,
+          );
+          return true;
+        } catch (error) {
+          console.error("SignIn error:", error);
+          return false;
+        }
       }
       return true;
     },
     async jwt({ token, account, profile }) {
       if (account?.provider === "discord" && account.access_token && profile) {
-        const user = await upsertUserFromDiscord(
-          profile as DiscordProfile,
-          account.access_token,
-        );
-        token.uid = user.id;
+        try {
+          const user = await upsertUserFromDiscord(
+            profile as DiscordProfile,
+            account.access_token,
+          );
+          token.uid = user.id;
+        } catch (error) {
+          console.error("JWT callback error:", error);
+        }
       }
       return token;
     },
