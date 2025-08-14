@@ -3,9 +3,14 @@ import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import { Session } from "next-auth";
+
+interface ExtendedSession extends Session {
+  userId?: string;
+}
 
 export default async function DashboardPage() {
-  const session = await getServerSession(authOptions);
+  const session = (await getServerSession(authOptions)) as ExtendedSession;
 
   if (!session) {
     redirect("/");
@@ -38,7 +43,9 @@ export default async function DashboardPage() {
           <div>
             <p className="text-lg font-medium">{session.user?.name}</p>
             <p className="text-gray-600">{session.user?.email}</p>
-            <p className="text-sm text-gray-500">User ID: {session.userId}</p>
+            <p className="text-sm text-gray-500">
+              User ID: {session.userId || "N/A"}
+            </p>
           </div>
         </div>
       </div>
