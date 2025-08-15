@@ -1,0 +1,226 @@
+{
+  "lastUpdated": "2025-08-14T22:30:00Z",
+  "version": "1.0.0",
+  "project": {
+    "name": "The Network",
+    "description": "AI & Development Kingdom",
+    "framework": "Next.js 15.4.6",
+    "language": "TypeScript",
+    "styling": "Tailwind CSS",
+    "database": "PostgreSQL with Prisma",
+    "authentication": "NextAuth.js with Discord",
+    "deployment": "Render"
+  },
+  "routes": {
+    "pages": {
+      "/": {
+        "file": "app/page.tsx",
+        "type": "static",
+        "description": "Landing page with Discord login",
+        "components": ["Discord login button", "Logo", "Welcome message"]
+      },
+      "/dashboard": {
+        "file": "app/dashboard/page.tsx",
+        "type": "dynamic",
+        "description": "User dashboard with profile, stats, and quick actions",
+        "components": [
+          "User profile",
+          "XP/coins bars",
+          "Quick stats",
+          "Open challenges",
+          "Quick actions"
+        ]
+      },
+      "/challenges": {
+        "file": "app/challenges/page.tsx",
+        "type": "dynamic",
+        "description": "Display all challenges organized by status",
+        "components": [
+          "Challenge cards",
+          "Active/Upcoming/Past sections",
+          "Status badges"
+        ]
+      },
+      "/admin": {
+        "file": "app/admin/page.tsx",
+        "type": "static",
+        "description": "Admin dashboard overview",
+        "components": ["System overview", "Quick actions", "Recent activity"]
+      },
+      "/admin/challenges": {
+        "file": "app/admin/challenges/page.tsx",
+        "type": "static",
+        "description": "Admin challenges management",
+        "components": ["Challenges list", "Management tools"]
+      },
+      "/admin/challenges/new": {
+        "file": "app/admin/challenges/new/page.tsx",
+        "type": "client",
+        "description": "Create new challenge form",
+        "components": [
+          "Challenge creation form",
+          "Form validation",
+          "API integration"
+        ]
+      },
+      "/admin/users": {
+        "file": "app/admin/users/page.tsx",
+        "type": "static",
+        "description": "User management",
+        "components": ["User list", "Management tools"]
+      },
+      "/admin/users/roles": {
+        "file": "app/admin/users/roles/page.tsx",
+        "type": "static",
+        "description": "Role management",
+        "components": ["Role management interface"]
+      },
+      "/admin/system/health": {
+        "file": "app/admin/system/health/page.tsx",
+        "type": "static",
+        "description": "System health monitoring",
+        "components": ["Health status", "System metrics"]
+      },
+      "/leaderboards": {
+        "file": "app/leaderboards/page.tsx",
+        "type": "static",
+        "description": "Leaderboards page",
+        "components": ["Leaderboard display"]
+      },
+      "/test": {
+        "file": "app/test/page.tsx",
+        "type": "static",
+        "description": "Test page",
+        "components": ["Test content"]
+      },
+      "/treasury": {
+        "file": "app/treasury/page.tsx",
+        "type": "static",
+        "description": "Treasury page",
+        "components": ["Treasury content"]
+      }
+    },
+    "api": {
+      "/api/auth/[...nextauth]": {
+        "file": "app/api/auth/[...nextauth]/route.ts",
+        "type": "dynamic",
+        "description": "NextAuth.js authentication routes",
+        "providers": ["Discord"]
+      },
+      "/api/challenges": {
+        "file": "app/api/challenges/route.ts",
+        "type": "dynamic",
+        "description": "Challenge CRUD operations",
+        "methods": ["POST"]
+      },
+      "/api/debug": {
+        "file": "app/api/debug/route.ts",
+        "type": "dynamic",
+        "description": "Debug information endpoint"
+      },
+      "/api/health": {
+        "file": "app/api/health/route.ts",
+        "type": "dynamic",
+        "description": "Health check endpoint"
+      },
+      "/api/stripe/webhook": {
+        "file": "app/api/stripe/webhook/route.ts",
+        "type": "dynamic",
+        "description": "Stripe webhook handler"
+      },
+      "/api/upload": {
+        "file": "app/api/upload/route.ts",
+        "type": "dynamic",
+        "description": "File upload endpoint"
+      }
+    }
+  },
+  "components": {
+    "layout": {
+      "RootLayout": {
+        "file": "app/layout.tsx",
+        "description": "Root layout with header, navigation, and footer",
+        "components": ["Header", "Navigation", "Footer", "AuthProvider"]
+      }
+    },
+    "ui": {
+      "AuthProvider": {
+        "file": "components/AuthProvider.tsx",
+        "description": "NextAuth.js session provider"
+      }
+    },
+    "deleted": {
+      "DiscordLoginButton": {
+        "file": "components/DiscordLoginButton.tsx",
+        "status": "deleted",
+        "reason": "Caused client-side errors with onClick handlers"
+      }
+    }
+  },
+  "configuration": {
+    "tailwind": {
+      "file": "tailwind.config.js",
+      "description": "Tailwind CSS configuration with custom brand colors"
+    },
+    "postcss": {
+      "file": "postcss.config.js",
+      "description": "PostCSS configuration"
+    },
+    "prisma": {
+      "file": "prisma/schema.prisma",
+      "description": "Database schema with User, Challenge, Submission models"
+    },
+    "auth": {
+      "file": "lib/auth.ts",
+      "description": "NextAuth.js configuration with Discord provider"
+    },
+    "prismaClient": {
+      "file": "lib/prisma.ts",
+      "description": "Prisma client instance"
+    }
+  },
+  "styles": {
+    "globals": {
+      "file": "app/globals.css",
+      "description": "Global CSS with Discord theme and custom utilities"
+    }
+  },
+  "dependencies": {
+    "core": ["next", "react", "react-dom"],
+    "database": ["@prisma/client", "prisma"],
+    "authentication": ["next-auth"],
+    "validation": ["zod"],
+    "styling": ["tailwindcss", "autoprefixer"],
+    "development": [
+      "@types/node",
+      "@types/react",
+      "eslint",
+      "prettier",
+      "husky"
+    ]
+  },
+  "knownIssues": {
+    "resolved": [
+      {
+        "issue": "Client-side exceptions on landing page",
+        "rootCause": "onClick handlers in Server Components",
+        "solution": "Removed DiscordLoginButton, used Next.js Link components",
+        "date": "2025-08-14"
+      },
+      {
+        "issue": "Build errors with TypeScript 'any' types",
+        "rootCause": "Improper type definitions",
+        "solution": "Added proper interfaces and type definitions",
+        "date": "2025-08-14"
+      }
+    ],
+    "active": []
+  },
+  "deployment": {
+    "platform": "Render",
+    "url": "https://thenetwork2.onrender.com",
+    "serviceId": "srv-d2f24vadbo4c73916cpg",
+    "autoDeploy": true,
+    "environment": "production"
+  }
+}
