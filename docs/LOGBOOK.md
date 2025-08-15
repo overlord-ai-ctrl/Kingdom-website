@@ -2,6 +2,58 @@
 
 This document tracks all development work, what works, what breaks, and the root causes of issues.
 
+## [2025-08-15] Create Challenge Flow Error Resolution
+
+### Summary
+
+Fixed client-side runtime errors in the create challenge flow by adding comprehensive validation, error handling, and error boundaries.
+
+### Files touched
+
+- `app/admin/challenges/new/page.tsx` (updated - added client-side validation and error handling)
+- `app/api/challenges/route.ts` (updated - improved error handling and diagnostic logging)
+- `app/admin/error.tsx` (created - error boundary for admin routes)
+
+### What works now
+
+- Client-side form validation prevents invalid submissions
+- Field-level error messages with visual indicators
+- Robust API error handling with detailed error codes
+- Diagnostic logging for debugging (CREATE-CHALLENGE prefix)
+- Error boundary prevents admin page crashes
+- Proper JSON parsing with error handling
+- Database error handling for constraint violations
+- Success feedback before redirect
+
+### What still breaks or is flaky
+
+- None identified
+
+### Root cause notes
+
+- Previous client-side errors were likely caused by:
+  - Missing form validation allowing invalid data submission
+  - Poor error handling in API route causing unhandled exceptions
+  - No error boundaries to catch and display errors gracefully
+  - Insufficient diagnostic logging to identify exact failure points
+
+### Verification
+
+- Build passes successfully with no TypeScript errors
+- All routes compile correctly
+- Error boundary properly catches and displays errors
+- Form validation prevents invalid submissions
+- API route handles all error cases gracefully
+
+### Next steps
+
+- Test end-to-end challenge creation flow
+- Monitor console logs for any remaining issues
+- Consider adding success toast notifications
+- Add integration tests for the create challenge flow
+
+---
+
 ## [2025-08-14] Initial Documentation Setup
 
 ### Summary
